@@ -68,15 +68,11 @@ class CreateTable {
   createReleasesTableQuery = `
     CREATE TABLE IF NOT EXISTS ticketinfo (
       id VARCHAR(50) PRIMARY KEY,
-      event_id VARCHAR(50) NOT NULL,
-      event_name VARCHAR(100) NOT NULL,
-      organizer_name VARCHAR(50) NOT NULL,
-      buyer_name VARCHAR(50) NOT NULL,
-      buyer_phone VARCHAR(20) NOT NULL,
       buyer_email VARCHAR(100) NOT NULL,
+      buyer_phone VARCHAR(20) NOT NULL,
+      buyer_name VARCHAR(50) NOT NULL,
       original_cost FLOAT NOT NULL,
-      transaction_id VARCHAR(50) NOT NULL,
-      ticket_id VARCHAR(50) NOT NULL,
+      ticket_details VARCHAR(600) NOT NULL,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );

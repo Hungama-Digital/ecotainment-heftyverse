@@ -21,4 +21,4 @@ let getConnection = (callback) => {
     });
   };
 
-  exports.getConnection = getConnection;
+exports.getConnection = getConnection;
