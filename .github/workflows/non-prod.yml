@@ -1,0 +1,61 @@
+name: eco-hefty-non-prod
+on:
+  push:
+    branches:
+      - non-prod
+
+jobs:
+  eco-hefty-non-prod:
+    runs-on: ubuntu-latest
+
+    permissions: 
+      id-token : write
+      contents: read
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set env
+      run: echo "GITHUB_BRANCH=$(echo $GITHUB_REF_NAME-$GITHUB_SHA)" >> $GITHUB_ENV
+
+    # Authenticate to Google Cloud using workload identity federation
+    - id: 'auth'
+      name: 'Obtain access token by using workload identity federation'
+      uses: 'google-github-actions/auth@v2'
+      
+      with:
+        create_credentials_file: true
+        token_format: access_token
+        workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER_NPROD }}/locations/global/workloadIdentityPools/github-action-hg-pool/providers/github-action-hg-provider
+        service_account: github-actions-hg@${{ secrets.GCP_PROJECT_ID_NPROD }}.iam.gserviceaccount.com
+
+    - name: Connect to Artifact Registry
+      run: |-
+        echo ${{ steps.auth.outputs.access_token }} | docker login -u oauth2accesstoken --password-stdin ${{ secrets.GCP_GAR_HOST_NPROD }}
+
+    - name: Build Docker Image
+      run: |-
+        docker build -t ${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}:$GITHUB_REF_NAME-$GITHUB_SHA .
+
+    - uses: actions/checkout@v2
+    - name: Set env
+      run: echo "GITHUB_BRANCH=$(echo $GITHUB_REF_NAME-$GITHUB_SHA)" >> $GITHUB_ENV
+
+    - name: Push Docker Image to Artifact Registry
+      run: |-
+        docker push ${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}:$GITHUB_REF_NAME-$GITHUB_SHA
+
+        git clone https://${{ secrets.GIT_OPS_GITHUB_USER }}:${{ secrets.GIT_OPS_GITHUB_TOKEN }}@github.com/Hungama-Wohlig/gcp-payment-gitops
+        cd gcp-payment-gitops
+        git checkout non-prod
+
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@wohlig.com"
+
+        yq e '.image.name = "${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}"' -i pay-node-cron/values.yaml
+        yq e '.image.tag = "${{ env.GITHUB_BRANCH }}"' -i pay-node-cron/values.yaml
+  
+        git add .
+        git commit -m "updating newer image"  
+        git push --set-upstream origin non-prod
