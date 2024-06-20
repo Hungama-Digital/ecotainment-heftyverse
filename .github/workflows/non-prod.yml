@@ -46,15 +46,15 @@ jobs:
       run: |-
         docker push ${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}:$GITHUB_REF_NAME-$GITHUB_SHA
 
-        git clone https://${{ secrets.GIT_OPS_GITHUB_USER }}:${{ secrets.GIT_OPS_GITHUB_TOKEN }}@github.com/Hungama-Wohlig/gcp-payment-gitops
-        cd gcp-payment-gitops
+        git clone https://${{ secrets.GIT_OPS_GITHUB_USER }}:${{ secrets.GIT_OPS_GITHUB_TOKEN }}@github.com/Hungama-Wohlig/gcp-heftyverse-gitops
+        cd gcp-heftyverse-gitops
         git checkout non-prod
 
         git config user.name "$GITHUB_ACTOR"
         git config user.email "$GITHUB_ACTOR@wohlig.com"
 
-        yq e '.image.name = "${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}"' -i pay-node-cron/values.yaml
-        yq e '.image.tag = "${{ env.GITHUB_BRANCH }}"' -i pay-node-cron/values.yaml
+        yq e '.image.name = "${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}"' -i hefty-eco/values.yaml
+        yq e '.image.tag = "${{ env.GITHUB_BRANCH }}"' -i hefty-eco/values.yaml
   
         git add .
         git commit -m "updating newer image"  
