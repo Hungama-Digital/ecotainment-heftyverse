@@ -1,6 +1,6 @@
 // require("module-alias/register");
 const Server = require("./config/server");
-require("custom-env").env("non-prod");
+// require("custom-env").env("non-prod");
 
 // Create server instance
 const server = new Server();
