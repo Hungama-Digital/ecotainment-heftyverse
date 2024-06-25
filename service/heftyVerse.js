@@ -74,9 +74,8 @@ class HeftyVerse {
           error: "Transaction Id Not Found!",
         };
       }
-
-      // Collect all detail query promises
-      const detailQueryPromises = transactionIds.map((transactionId) => {
+  
+      for (const transactionId of transactionIds) {
         const detailQuery = `
           SELECT d.buyer_email, d.buyer_phone, d.buyer_name, d.original_cost, 
           CONCAT('[', GROUP_CONCAT(d.ticket_id ORDER BY d.ticket_id), ']') AS ticket_details
@@ -84,27 +83,27 @@ class HeftyVerse {
           WHERE d.transaction_id = '${transactionId.transaction_id}'
           GROUP BY d.transaction_id, d.buyer_email, d.buyer_phone, d.buyer_name, d.original_cost;
         `;
-
-        return this.queryPromise(detailQuery)
-          .then((HeftyData) => {
-            if (HeftyData.length > 0) {
-              console.log(HeftyData[0]);
-              return this.heftyCall(HeftyData[0]);
-            } else {
-              console.error(`No data found for transaction ${transactionId.transaction_id}`);
+  
+        try {
+          const HeftyData = await this.queryPromise(detailQuery);
+          if (HeftyData.length > 0) {
+            HeftyData[0].ticket_details = HeftyData[0].ticket_details.slice(1, -1);
+            let ticketArray = HeftyData[0].ticket_details.split(',');
+            HeftyData[0].ticket_details = ticketArray.map(ticket => ticket.trim().replace(/"/g, ''));
+  
+            try {
+              const heftyResponse = await this.heftyCall(HeftyData[0]);
+              console.log(`Hefty Call Success for transaction ${transactionId.transaction_id}`, heftyResponse);
+            } catch (heftyError) {
+              console.error(`Hefty Call Error for transaction ${transactionId.transaction_id}:`, heftyError);
             }
-          })
-          .catch((error) => {
-            console.error(`Error processing transaction ${transactionId.transaction_id}:`, error);
-          });
-      });
-  
-      // Await all detail query promises
-      await Promise.all(detailQueryPromises);
-  
-      // Optionally, delete all data from the table
-      // const truncateQuery = `TRUNCATE TABLE ${process.env.MSDATABASE}.dumpexceldata`;
-      // await this.queryPromise(truncateQuery);
+          } else {
+            console.error(`No data found for transaction ${transactionId.transaction_id}`);
+          }
+        } catch (error) {
+          console.error(`Error processing transaction ${transactionId.transaction_id}:`, error);
+        }
+      }
   
       return {
         message: "Successfully Sent Data To Hefty Verse",
@@ -118,6 +117,9 @@ class HeftyVerse {
       };
     }
   };
+  
+  
+  
   
   
   // -------------------------------------
@@ -179,7 +181,7 @@ class HeftyVerse {
     return new Promise((resolve, reject) => {
       const apiKey = "d76f989a-81dd-11ed-a1eb-0242ac120002";
       // const url = `https://heftyverse-backend.v-verse.space/webhook/ticket-purchase`;
-      // const url = `https://backend-staging.heftyverse.v-verse.space/webhook/ticket-purchase`;
+      const url = `https://backend-staging.heftyverse.v-verse.space/webhook/ticket-purchase`;
       var options = {
         method: "POST",
         json: true,
