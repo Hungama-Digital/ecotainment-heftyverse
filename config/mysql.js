@@ -6,10 +6,10 @@ const pool = mysql.createPool({
   user: process.env.MSUSER,
   password: process.env.MSPASSWORD,
   database: process.env.MSDATABASE,
-//   waitForConnections: true,
-//   connectionLimit: 10,
-//   queueLimit: 0,
-//   connectTimeout: 10000 // 10 seconds
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  connectTimeout: 10000 // 10 seconds
 });
 
 let getConnection = (callback) => {

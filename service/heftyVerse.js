@@ -12,54 +12,6 @@ class HeftyVerse {
     return truncatedUniqueId;
   };
 
-  //---------------------Old------------------------
-
-  // callHeftyVerse = async (payload) => {
-  //   try {
-  //     const searchQuery = `SELECT transaction_id FROM ${process.env.MSDATABASE}.dumpexceldata`;
-  //     const transactionIds = await this.queryPromise(searchQuery);
-
-  //     if (transactionIds.length > 0) {
-  //       console.log("dbresponse : ", transactionIds);
-  //     } else {
-  //       console.log("Transaction Id Not Found!");
-  //       return {
-  //         status: 404,
-  //         error: "Transaction Id Not Found!",
-  //       };
-  //     }
-  //     for (const transactionId of transactionIds) {
-  //       try {
-  //         const detailQuery = `
-  //                   SELECT d.buyer_email, d.buyer_phone, d.buyer_name, d.original_cost, 
-  //                   CONCAT('[', GROUP_CONCAT(d.ticket_id ORDER BY d.ticket_id), ']') AS ticket_details
-  //                   FROM ${process.env.MSDATABASE}.dumpexceldata d
-  //                   WHERE d.transaction_id = '${transactionId.transaction_id}'
-  //                   GROUP BY d.transaction_id, d.buyer_email, d.buyer_phone, d.buyer_name, d.original_cost;
-  //               `;
-  //         const HeftyData = await this.queryPromise(detailQuery);
-  //         console.log(HeftyData[0]);
-  //         // Call HeftyVerse API
-  //         await this.heftyCall(HeftyData[0]);
-  //       } catch (error) {
-  //         console.error( `Error processing transaction ${transactionId.transaction_id}:`, error );
-  //       }
-  //     }
-  //     resolve({
-  //       message: "Successfully Send Data To Hefty Verse",
-  //       statusCode: 200,
-  //     });
-  //     // Delete All data from table ;
-  //    //   TRUNCATE TABLE ecotainment.dumpexceldata;
-  //   } catch (error) {
-  //     console.error("Database error:", error);
-  //     return {
-  //       status: 500,
-  //       error: "Internal Server Error",
-  //     };
-  //   }
-  // };
-
   // -------------------------------------
   callHeftyVerse = async (payload) => {
     try {
@@ -77,7 +29,7 @@ class HeftyVerse {
   
       for (const transactionId of transactionIds) {
         const detailQuery = `
-          SELECT d.buyer_email, d.buyer_phone, d.buyer_name, d.original_cost, 
+          SELECT d.buyer_email, d.buyer_name, d.buyer_phone, d.original_cost, 
           CONCAT('[', GROUP_CONCAT(d.ticket_id ORDER BY d.ticket_id), ']') AS ticket_details
           FROM ${process.env.MSDATABASE}.dumpexceldata d
           WHERE d.transaction_id = '${transactionId.transaction_id}'
@@ -87,16 +39,11 @@ class HeftyVerse {
         try {
           const HeftyData = await this.queryPromise(detailQuery);
           if (HeftyData.length > 0) {
+            HeftyData[0].buyer_phone = parseInt(HeftyData[0].buyer_phone);
+            HeftyData[0].original_cost = HeftyData[0].original_cost.toString();
             HeftyData[0].ticket_details = HeftyData[0].ticket_details.slice(1, -1);
             let ticketArray = HeftyData[0].ticket_details.split(',');
-            HeftyData[0].ticket_details = ticketArray.map(ticket => ticket.trim().replace(/"/g, ''));
-  
-            try {
-              const heftyResponse = await this.heftyCall(HeftyData[0]);
-              console.log(`Hefty Call Success for transaction ${transactionId.transaction_id}`, heftyResponse);
-            } catch (heftyError) {
-              console.error(`Hefty Call Error for transaction ${transactionId.transaction_id}:`, heftyError);
-            }
+            HeftyData[0].ticket_details = ticketArray.map(ticket => ({"ticket_id": ticket.trim().replace(/"/g, '')}));
   
             try {
               const userId = await this.generateUniqueId();
@@ -108,8 +55,6 @@ class HeftyVerse {
               });
               // Replace the first comma with an empty string
               ticketDetails = ticketDetails.replace(/,/, "");
-  
-              console.log(ticketDetails);
               const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.ticketinfo 
                       (id, buyer_email, buyer_phone, buyer_name, original_cost, ticket_details) 
                       VALUES (?, ?, ?, ?, ?, ?)`;
@@ -126,6 +71,14 @@ class HeftyVerse {
             } catch (error) {
               console.error("Error dumping data to DB:", error);
             }
+
+            // try {
+            //   const heftyResponse = await this.heftyCall(HeftyData[0]);
+            //   console.log(`Hefty Call Success for transaction ${transactionId.transaction_id}`, heftyResponse);
+            // } catch (heftyError) {
+            //   console.error(`Hefty Call Error for transaction ${transactionId.transaction_id}:`, heftyError);
+            // }
+
           } else {
             console.error(`No data found for transaction ${transactionId.transaction_id}`);
           }
@@ -202,7 +155,7 @@ class HeftyVerse {
 
   // HeftyVerse API calls
   heftyCall = (payload) => {
-    console.log("payload : ", payload);
+    console.log("Hi Hefty Call : ");
     return new Promise((resolve, reject) => {
       const apiKey = "d76f989a-81dd-11ed-a1eb-0242ac120002";
       // const url = `https://heftyverse-backend.v-verse.space/webhook/ticket-purchase`;
