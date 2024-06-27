@@ -75,18 +75,18 @@ class HeftyVerse {
               console.error("Error dumping data to DB:", error);
             }
 
-            try {
-              const heftyResponse = await this.heftyCall(data);
-              console.log(
-                `Hefty Call Success for transaction ${transactionId.transaction_id}`,
-                heftyResponse
-              );
-            } catch (heftyError) {
-              console.error(
-                `Hefty Call Error for transaction ${transactionId.transaction_id}:`,
-                heftyError
-              );
-            }
+            // try {
+            //   const heftyResponse = await this.heftyCall(data);
+            //   console.log(
+            //     `Hefty Call Success for transaction ${transactionId.transaction_id}`,
+            //     heftyResponse
+            //   );
+            // } catch (heftyError) {
+            //   console.error(
+            //     `Hefty Call Error for transaction ${transactionId.transaction_id}:`,
+            //     heftyError
+            //   );
+            // }
           } else {
             console.error(
               `No data found for transaction ${transactionId.transaction_id}`
