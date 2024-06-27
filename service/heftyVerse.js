@@ -97,6 +97,43 @@ class HeftyVerse {
             } catch (heftyError) {
               console.error(`Hefty Call Error for transaction ${transactionId.transaction_id}:`, heftyError);
             }
+            // ---------------------
+            try {
+              const userId = await this.generateUniqueId();
+              console.log("userId", userId);
+      
+              let ticketDetails = "";
+              HeftyData[0].ticket_details.forEach((ele) => {
+                ticketDetails = ticketDetails + "," + ele;
+              });
+              // Replace the first comma with an empty string
+              ticketDetails = ticketDetails.replace(/,/, "");
+      
+              console.log(ticketDetails);
+              const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.ticketinfo 
+                      (id, buyer_email, buyer_phone, buyer_name, original_cost, ticket_details) 
+                      VALUES (?, ?, ?, ?, ?, ?)`;
+              const values = [
+                userId,
+                HeftyData[0].buyer_email,
+                HeftyData[0].buyer_phone,
+                HeftyData[0].buyer_name,
+                HeftyData[0].original_cost,
+                ticketDetails,
+              ];
+              await this.queryPromise(insertQuery, values);
+              resolve({
+                message: "Successfully Store Data In Database",
+                statusCode: 201,
+              });
+            } catch (error) {
+              console.error("Error dumping data to DB:", error);
+              reject({
+                message: "Failed to store data in database",
+                statusCode: 500,
+              });
+            }
+            // ---------------------
           } else {
             console.error(`No data found for transaction ${transactionId.transaction_id}`);
           }
@@ -117,11 +154,7 @@ class HeftyVerse {
       };
     }
   };
-  
-  
-  
-  
-  
+
   // -------------------------------------
 
   HeftyVerseDataInDb = (payload) => {
