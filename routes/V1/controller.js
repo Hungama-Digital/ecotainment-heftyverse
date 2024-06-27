@@ -5,20 +5,21 @@ const bodyParser = require("body-parser");
 
 class eventsTicketsController {
   constructor() {
-    this.readExcel = new ReadExcel()
-    this.createTables = new CreateTables()
-    this.heftyVerse = new HeftyVerse()
+    this.readExcel = new ReadExcel();
+    this.createTables = new CreateTables();
+    this.heftyVerse = new HeftyVerse();
   }
 
   dumpDataInDB = (req, res) => {
-    console.log('file Name',req.files);
+    console.log("file Name", req.files);
     let payload = req.files === undefined ? undefined : req.files.file;
-      this.readExcel.dumpDataInDB(payload)
-        .then((result) => {
-          return res.status(200).json({ result });
-        })
-        .catch((err) => {
-          return res.status(500).json(err);
+    this.readExcel
+      .dumpDataInDB(payload)
+      .then((result) => {
+        return res.status(200).json({ result });
+      })
+      .catch((err) => {
+        return res.status(500).json(err);
       });
   };
 
@@ -31,34 +32,41 @@ class eventsTicketsController {
       ticket_details: req.body.ticket_details,
     };
 
-    this.heftyVerse.HeftyVerseDataInDb(payload)
-        .then((result) => {
-          return res.status(200).json({ result });
-        })
-        .catch((err) => {
-          return res.status(500).json(err);
-      });
-  };
-   
-  createTable = (req, res) => {
-    this.createTables.createTables()
+    this.heftyVerse
+      .HeftyVerseDataInDb(payload)
       .then((result) => {
         return res.status(200).json({ result });
       })
       .catch((err) => {
         return res.status(500).json(err);
-    });
-};
+      });
+  };
 
-callHeftyVerse = (req, res) => {
-  this.heftyVerse.callHeftyVerse()
-    .then((result) => {
-      return res.status(200).json({ result });
-    })
-    .catch((err) => {
-      return res.status(500).json(err);
-  });
-};
+  createTable = (req, res) => {
+    this.createTables
+      .createTables()
+      .then((result) => {
+        return res.status(200).json({ result });
+      })
+      .catch((err) => {
+        return res.status(500).json(err);
+      });
+  };
+
+  callHeftyVerse = (req, res) => {
+    this.heftyVerse
+      .callHeftyVerse()
+      .then((result) => {
+        if (result.statusCode === 200) {
+          return res.status(200).json(result);
+        } else {
+          return res.status(result.status).json(result);
+        }
+      })
+      .catch((err) => {
+        return res.status(500).json(err);
+      });
+  };
 }
 
 module.exports = eventsTicketsController;

@@ -18,7 +18,7 @@ class HeftyVerse {
       // Fetch all transaction IDs in one query
       const searchQuery = `SELECT transaction_id FROM ${process.env.MSDATABASE}.dumpexceldata`;
       const transactionIds = await this.queryPromise(searchQuery);
-
+  
       if (transactionIds.length === 0) {
         console.log("Transaction Id Not Found!");
         return {
@@ -26,7 +26,7 @@ class HeftyVerse {
           error: "Transaction Id Not Found!",
         };
       }
-
+  
       for (const transactionId of transactionIds) {
         const detailQuery = `
           SELECT d.buyer_email, d.buyer_name, d.buyer_phone, d.original_cost, 
@@ -35,7 +35,7 @@ class HeftyVerse {
           WHERE d.transaction_id = '${transactionId.transaction_id}'
           GROUP BY d.transaction_id, d.buyer_email, d.buyer_phone, d.buyer_name, d.original_cost;
         `;
-
+  
         try {
           const HeftyData = await this.queryPromise(detailQuery);
           if (HeftyData.length > 0) {
@@ -47,17 +47,17 @@ class HeftyVerse {
             data.ticket_details = ticketArray.map((ticket) => ({
               ticket_id: ticket.trim().replace(/"/g, ""),
             }));
-
+  
             try {
               const userId = await this.generateUniqueId();
               console.log("userId", userId);
-
+  
               let ticketDetails = "";
               data.ticket_details.forEach((ele) => {
                 ticketDetails = ticketDetails + "," + JSON.stringify(ele);
               });
               ticketDetails = ticketDetails.replace(/^,/, "");
-
+  
               const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.ticketinfo 
                       (id, buyer_email, buyer_phone, buyer_name, original_cost, ticket_details) 
                       VALUES (?, ?, ?, ?, ?, ?)`;
@@ -74,7 +74,8 @@ class HeftyVerse {
             } catch (error) {
               console.error("Error dumping data to DB:", error);
             }
-
+  
+            // Uncomment if needed
             // try {
             //   const heftyResponse = await this.heftyCall(data);
             //   console.log(
@@ -88,18 +89,12 @@ class HeftyVerse {
             //   );
             // }
           } else {
-            console.error(
-              `No data found for transaction ${transactionId.transaction_id}`
-            );
+            console.error(`No data found for transaction ${transactionId.transaction_id}`);
           }
         } catch (error) {
-          console.error(
-            `Error processing transaction ${transactionId.transaction_id}:`,
-            error
-          );
+          console.error(`Error processing transaction ${transactionId.transaction_id}:`, error);
         }
       }
-
       return {
         message: "Successfully Sent Data To Hefty Verse",
         statusCode: 200,
@@ -108,10 +103,11 @@ class HeftyVerse {
       console.error("Database error:", error);
       return {
         status: 500,
-        error: "Internal Server Error",
+        error: error,
       };
     }
   };
+  
   // -------------------------------------
 
   HeftyVerseDataInDb = (payload) => {
