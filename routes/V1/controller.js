@@ -11,7 +11,6 @@ class eventsTicketsController {
   }
 
   dumpDataInDB = (req, res) => {
-    console.log("file Name", req.files);
     let payload = req.files === undefined ? undefined : req.files.file;
     this.readExcel
       .dumpDataInDB(payload)

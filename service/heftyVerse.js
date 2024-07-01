@@ -119,15 +119,20 @@ class HeftyVerse {
         };
 
         // Call HeftyVerse API
-        await this.heftyCall(heftypayload);
+        try {
+          const heftyResponse = await this.heftyCall(heftypayload);
+          console.log(`Successfully data send to Hefty Verse`,heftyResponse);
+        } catch (heftyError) {
+          console.error(`Unable to send data Hefty Verse`,heftyError);
+        }
         const userId = await this.generateUniqueId();
         let ticketDetails = "";
         heftypayload.ticket_details.forEach((ele) => {
-          ticketDetails = ticketDetails + "," + ele;
+          ticketDetails = ticketDetails + "," + ele.ticket_id;
         });
         // Replace the first comma with an empty string
         ticketDetails = ticketDetails.replace(/,/, "");
-        
+
         const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.ticketinfo 
                 (id, buyer_email, buyer_phone, buyer_name, original_cost, ticket_details) 
                 VALUES (?, ?, ?, ?, ?, ?)`;
