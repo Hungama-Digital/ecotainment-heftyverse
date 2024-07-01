@@ -21,7 +21,6 @@ class readExcel {
         const sheet = workbook.Sheets[sheetName];
         const range = XLSX.utils.decode_range(sheet["!ref"]);
         const numRows = range.e.r + 1;
-        console.log("Number of Rows", numRows);
 
         for (let i = 2; i <= numRows; i++) {
           const row = {
@@ -35,10 +34,8 @@ class readExcel {
             transaction_id: sheet[`H${i}`]?.v || "",
             ticket_id: sheet[`I${i}`]?.v || "",
           };
-          console.log(`Row ${i}`, row);
 
           const userId = await this.generateUniqueId();
-          console.log("userId", userId);
 
           const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.dumpexceldata 
                 (id, event_id, event_name, organizer_name, buyer_name, buyer_phone, buyer_email, original_cost, transaction_id, ticket_id) 
@@ -81,8 +78,10 @@ class readExcel {
         } else {
           conn.query(sql, values, (error, results) => {
             if (error) {
+              conn.release();
               return reject(error);
             }
+            conn.release();
             resolve(results);
           });
         }
