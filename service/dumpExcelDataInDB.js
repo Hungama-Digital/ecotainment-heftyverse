@@ -78,7 +78,7 @@ class readExcel {
         } else {
           conn.query(sql, values, (error, results) => {
             if (error) {
-              conn.release();
+              conn.release();  // Release Database connection
               return reject(error);
             }
             conn.release();
