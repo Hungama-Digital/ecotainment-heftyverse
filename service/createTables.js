@@ -87,8 +87,10 @@ class CreateTable {
         } else {
           conn.query(sql, values, (error, results) => {
             if (error) {
+              conn.release();
               return reject(error);
             }
+            conn.release();
             resolve(results);
           });
         }

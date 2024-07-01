@@ -50,8 +50,6 @@ class HeftyVerse {
   
             try {
               const userId = await this.generateUniqueId();
-              console.log("userId", userId);
-  
               let ticketDetails = "";
               data.ticket_details.forEach((ele) => {
                 ticketDetails = ticketDetails + "," + JSON.stringify(ele);
@@ -74,23 +72,24 @@ class HeftyVerse {
             } catch (error) {
               console.error("Error dumping data to DB:", error);
             }
-  
-            // Uncomment if needed
-            // try {
-            //   const heftyResponse = await this.heftyCall(data);
-            //   console.log(
-            //     `Hefty Call Success for transaction ${transactionId.transaction_id}`,
-            //     heftyResponse
-            //   );
-            // } catch (heftyError) {
-            //   console.error(
-            //     `Hefty Call Error for transaction ${transactionId.transaction_id}:`,
-            //     heftyError
-            //   );
-            // }
+
+            try {
+              const heftyResponse = await this.heftyCall(data);
+              console.log(
+                `Hefty Call Success for transaction ${transactionId.transaction_id}`,
+                heftyResponse
+              );
+            } catch (heftyError) {
+              console.error(
+                `Hefty Call Error for transaction ${transactionId.transaction_id}:`,
+                heftyError
+              );
+            }
           } else {
             console.error(`No data found for transaction ${transactionId.transaction_id}`);
           }
+          const deleteQuery = `delete from ecotainment.dumpexceldata where transaction_id = '${transactionId.transaction_id}';`;
+          await this.queryPromise(deleteQuery);
         } catch (error) {
           console.error(`Error processing transaction ${transactionId.transaction_id}:`, error);
         }
@@ -107,8 +106,6 @@ class HeftyVerse {
       };
     }
   };
-  
-  // -------------------------------------
 
   HeftyVerseDataInDb = (payload) => {
     return new Promise(async (resolve, reject) => {
@@ -123,18 +120,14 @@ class HeftyVerse {
 
         // Call HeftyVerse API
         await this.heftyCall(heftypayload);
-
         const userId = await this.generateUniqueId();
-        console.log("userId", userId);
-
         let ticketDetails = "";
         heftypayload.ticket_details.forEach((ele) => {
           ticketDetails = ticketDetails + "," + ele;
         });
         // Replace the first comma with an empty string
         ticketDetails = ticketDetails.replace(/,/, "");
-
-        console.log(ticketDetails);
+        
         const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.ticketinfo 
                 (id, buyer_email, buyer_phone, buyer_name, original_cost, ticket_details) 
                 VALUES (?, ?, ?, ?, ?, ?)`;
@@ -163,7 +156,6 @@ class HeftyVerse {
 
   // HeftyVerse API calls
   heftyCall = (payload) => {
-    console.log("Hi Hefty Call : ");
     return new Promise((resolve, reject) => {
       const apiKey = "d76f989a-81dd-11ed-a1eb-0242ac120002";
       // const url = `https://heftyverse-backend.v-verse.space/webhook/ticket-purchase`;
@@ -197,8 +189,10 @@ class HeftyVerse {
         } else {
           conn.query(sql, values, (error, results) => {
             if (error) {
+              conn.release();
               return reject(error);
             }
+            conn.release();
             resolve(results);
           });
         }
