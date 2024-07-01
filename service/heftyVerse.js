@@ -127,7 +127,7 @@ class HeftyVerse {
         const userId = await this.generateUniqueId();
         let ticketDetails = "";
         heftypayload.ticket_details.forEach((ele) => {
-          ticketDetails = ticketDetails + "," + ele.ticket_id;
+          ticketDetails = ticketDetails + "," + JSON.stringify(ele.ticket_id);
         });
         // Replace the first comma with an empty string
         ticketDetails = ticketDetails.replace(/,/, "");
