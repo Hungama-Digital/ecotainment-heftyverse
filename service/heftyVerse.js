@@ -12,7 +12,6 @@ class HeftyVerse {
     return truncatedUniqueId;
   };
 
-  // -------------------------------------
   callHeftyVerse = async (payload) => {
     try {
       // Fetch all transaction IDs in one query
@@ -52,7 +51,7 @@ class HeftyVerse {
               const userId = await this.generateUniqueId();
               let ticketDetails = "";
               data.ticket_details.forEach((ele) => {
-                ticketDetails = ticketDetails + "," + JSON.stringify(ele);
+                ticketDetails = ticketDetails + "," + JSON.stringify(ele.ticket_id);
               });
               ticketDetails = ticketDetails.replace(/^,/, "");
   
