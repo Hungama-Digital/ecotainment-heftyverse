@@ -22,6 +22,13 @@ class CreateTable {
           console.log("Ticket Info Table Created");
         }
 
+        const youTubeInfoTableCreated = await this.execute(
+          this.createyouTubeInfoTableQuery
+        );
+        if (youTubeInfoTableCreated) {
+          console.log("youTube Info Table Created");
+        }
+
         return resolve({
           message: "Tables created successfully",
           statusCode: 200,
@@ -77,6 +84,26 @@ class CreateTable {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
   `;
+
+  createyouTubeInfoTableQuery = `
+  CREATE TABLE IF NOT EXISTS youTubeInfo (
+    id VARCHAR(50) PRIMARY KEY,
+    videoId VARCHAR(50),
+    publisheAt VARCHAR(50),
+    channelId VARCHAR(50),
+    title VARCHAR(500),
+    thumbnailsUrl VARCHAR(100),
+    channelTitle VARCHAR(100),
+    tags VARCHAR(1500),
+    categoryId VARCHAR(10),
+    videoUrl VARCHAR(100),
+    viewCount VARCHAR(50),
+    likeCount VARCHAR(50),
+    commentCount VARCHAR(50),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  );
+`;
 
   // Method to execute a query with promise
   queryPromise = async (sql, values) => {

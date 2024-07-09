@@ -1,6 +1,8 @@
 const CreateTables = require("../../service/createTables");
 const ReadExcel = require("../../service/dumpExcelDataInDB");
 const HeftyVerse = require("../../service/heftyVerse");
+const TrandingYouTubeData = require("../../service/youTube");
+
 const bodyParser = require("body-parser");
 
 class eventsTicketsController {
@@ -8,6 +10,7 @@ class eventsTicketsController {
     this.readExcel = new ReadExcel();
     this.createTables = new CreateTables();
     this.heftyVerse = new HeftyVerse();
+    this.trandingYouTubeData = new TrandingYouTubeData();
   }
 
   dumpDataInDB = (req, res) => {
@@ -55,6 +58,21 @@ class eventsTicketsController {
   callHeftyVerse = (req, res) => {
     this.heftyVerse
       .callHeftyVerse()
+      .then((result) => {
+        if (result.statusCode === 200) {
+          return res.status(200).json(result);
+        } else {
+          return res.status(result.status).json(result);
+        }
+      })
+      .catch((err) => {
+        return res.status(500).json(err);
+      });
+  };
+
+  trandingYouTubeVideo = (req, res) => {
+    this.trandingYouTubeData
+      .trandingYouTubeVideo(req)
       .then((result) => {
         if (result.statusCode === 200) {
           return res.status(200).json(result);
