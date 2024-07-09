@@ -52,6 +52,7 @@ class TrandingYouTubeData {
               resultData.push(data);
             }
           }
+          console.log("Array Length" , resultData.length);
 
           for (const item of resultData) {
             try {
