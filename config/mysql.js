@@ -2,15 +2,15 @@ const mysql = require('mysql2');
 require('custom-env').env('non-prod');
 
 const pool = mysql.createPool({
-  host: process.env.MSHOST,    // 'localhost' or '127.0.0.1' for local server
+  host: process.env.MSHOST, // 'localhost' or '127.0.0.1' for local server
   user: process.env.MSUSER,
   password: process.env.MSPASSWORD,
   database: process.env.MSDATABASE,
-  charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 10000 // 10 seconds
+  connectTimeout: 10000, // 10 seconds
+  charset: 'utf8mb4'
 });
 
 let getConnection = (callback) => {
