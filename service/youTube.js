@@ -33,15 +33,15 @@ class TrandingYouTubeData {
               data.videoId = item.id.videoId;
               data.publishedAt = item.snippet.publishedAt;
               data.channelId = item.snippet.channelId;
-              data.title = JSON.stringify(item.snippet.title);
-              data.channelTitle = item.snippet.channelTitle;
+              data.title = item.snippet.title.replace(/[^\x00-\x7F]/g, '');
+              data.channelTitle = item.snippet.channelTitle.replace(/[^\x00-\x7F]/g, '');
               data.videoUrl = `https://www.youtube.com/watch?v=${item.id.videoId}`;
               // Call videoMetaData API
               try {
                 const videoMetaDataResponse = await this.videoMetaData(item.id.videoId);
                 data.thumbnailsUrl = videoMetaDataResponse.items[0].snippet.thumbnails.maxres.url;
                 let tagsString = videoMetaDataResponse.items[0].snippet.tags.map((tag) => `"${tag}"`).join(", ");
-                data.tags = JSON.stringify(tagsString);
+                data.tags = tagsString.replace(/[^\x00-\x7F]/g, '');
                 data.categoryId = videoMetaDataResponse.items[0].snippet.categoryId;
                 data.viewCount = videoMetaDataResponse.items[0].statistics.viewCount;
                 data.likeCount = videoMetaDataResponse.items[0].statistics.likeCount;
