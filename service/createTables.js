@@ -100,6 +100,8 @@ class CreateTable {
     viewCount VARCHAR(50),
     likeCount VARCHAR(50),
     commentCount VARCHAR(50),
+    language VARCHAR(30),
+    type VARCHAR(30),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   );

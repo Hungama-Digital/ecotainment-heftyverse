@@ -14,6 +14,8 @@ class TrandingYouTubeData {
 
   trandingYouTubeVideo = (payload) => {
     return new Promise(async (resolve, reject) => {
+      let inputString = `${payload.query.q}`;
+      let [language, type] = inputString.split(" ");
       const apiKey = "AIzaSyCPZm60xdkHE8-5Fi-vlISlgq4YrJIuuyQ";
       const url = `https://www.googleapis.com/youtube/v3/search?part=${payload.query.part}&q=${payload.query.q}&type=${payload.query.type}&regionCode=${payload.query.regionCode}&maxResults=${payload.query.maxResults}&key=${apiKey}`;
       var options = {
@@ -57,8 +59,8 @@ class TrandingYouTubeData {
           for (const item of resultData) {
             try {
               const insertQuery = `INSERT INTO ${process.env.MSDATABASE}.youTubeInfo 
-                      (id, videoId, publisheAt, channelId, title, thumbnailsUrl, channelTitle, tags, categoryId, videoUrl, viewCount, likeCount, commentCount) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                      (id, videoId, publisheAt, channelId, title, thumbnailsUrl, channelTitle, tags, categoryId, videoUrl, viewCount, likeCount, commentCount, language, type) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
               const values = [
                 item.id,
                 item.videoId,
@@ -73,6 +75,8 @@ class TrandingYouTubeData {
                 item.viewCount,
                 item.likeCount,
                 item.commentCount,
+                language,
+                type
               ];
               await this.queryPromise(insertQuery, values);
               console.log("Successfully Store Data In Database");
