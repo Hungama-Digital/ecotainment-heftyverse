@@ -51,7 +51,7 @@ jobs:
         git checkout non-prod
 
         git config user.name "$GITHUB_ACTOR"
-        git config user.email "$GITHUB_ACTOR@wohlig.com"
+        git config user.email "$GITHUB_ACTOR@hungama.com"
 
         yq e '.image.name = "${{ secrets.GCP_GAR_HOST_NPROD }}/${{ secrets.GCP_PROJECT_ID_NPROD }}/${{ secrets.GCP_REPO_NPROD }}/${{ secrets.GCP_IMAGE_NAME_NPROD }}"' -i hefty-eco/values.yaml
         yq e '.image.tag = "${{ env.GITHUB_BRANCH }}"' -i hefty-eco/values.yaml
